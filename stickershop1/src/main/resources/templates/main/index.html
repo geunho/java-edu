@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout/main_layout">
+
+<th:block layout:fragment="html_head">
+    <title>안녕하세요 스티커샵입니다.</title>
+    <script src="/js/bower_components/jquery/dist/jquery.js"></script>
+
+    <script>
+        function addWishlistItem(productId){
+            $.ajax({
+                url : '/api/wishlist/'+productId,
+                method : 'post',
+                dataType: "text",
+                success : function (data) {
+                    if(data == "ok") {
+                        alert("위시리스트에 추가되었습니다.");
+                    }else if(data == "exist"){
+                        alert("이미 위시리스트에 존재하는 상품입니다.");
+                    }else if(data == "guest"){
+                        alert("로그인 하시면 위시리스트를 추가하실 수 있습니다.");
+                    }
+                }
+            });
+        }
+    </script>
+</th:block>
+
+<th:block layout:fragment="body_main">
+    <br><br>
+    <div class="container-fluid" style="width: 60%; padding-bottom: 60px;">
+        <nav>
+            <ul class="pagination justify-content-center">
+                <a th:href="@{/products}"><img height="auto" th:src="@{/images/shop-now.png}"></a>
+            </ul>
+        </nav>
+    </div>
+    <div></div>
+    <div style="text-align: center"><h2><strong>Best Sellers</strong></h2></div>
+    <hr style="padding-bottom: 40px">
+    <div class="container-fluid" style="width: 70%;">
+        <div class="row">
+            <div class="card" style="width: 31%; margin-left: 15px; margin-bottom: 15px;" th:if="${not #lists.isEmpty(list)}" th:each="product : ${list}">
+                <div style="text-align: right; margin: 5px">
+                    <a href="javascript:void(0);" th:onclick="'javascript:addWishlistItem(' + ${product.id} + ')'">
+                        <svg class="i-heart" id="heart" name="heart" viewBox="0 0 32 32" width="20" height="20" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                            <path d="M4 16 C1 12 2 6 7 4 12 2 15 6 16 8 17 6 21 2 26 4 31 6 31 12 28 16 25 20 16 28 16 28 16 28 7 20 4 16 Z" />
+                        </svg>
+                    </a>
+                </div>
+                <a th:href="@{'/products/' + ${product.id}}">
+                    <img class="card-img-top" th:src="@{${product.imagePath}}">
+                </a>
+                <div class="card-body">
+                    <h6><span class="badge badge-pill badge-success">best</span>&nbsp;<span class="badge badge-pill badge-info">new</span></h6>
+                    <a style="font-family: Consolas, 돋움;" th:href="@{'/products/' + ${product.id}}">
+                        <h3 class="card-title"><strong th:text="${product.name}"></strong></h3>
+                    </a>
+                    <p class="card-text"><h4 th:text="${#numbers.formatCurrency(product.price)}"></h4></p>
+                </div>
+            </div>
+        </div>
+        <div style="padding-top:20px; padding-bottom: 100px; text-align: center;">
+            <a th:href="@{/products}"><h2><span class="badge badge-pill badge-light">상품 더 보기</span></h2></a>
+        </div>
+    </div>
+</th:block>
+
+</html>

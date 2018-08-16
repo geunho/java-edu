@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout/main_layout">
+
+<th:block layout:fragment="html_head">
+    <title>상품 상세보기</title>
+    <style>
+        #quantity:hover {
+            cursor: initial;
+        }
+    </style>
+    <script>
+        // function changeQuant(type){
+        //     var quant = parseInt($("#quantity").val());
+        //     var tot = parseInt($("#totalPrice").val());
+        //     alert(totalPrice);
+        //     if(type == "minus"){
+        //         if(quant > 1) {
+        //             quant = $("#quantity").val(quant - 1);
+        //             tot /= 2;
+        //             $("#totalPrice").val(tot);
+        //             $("#quantity").html(quant);
+        //         }
+        //     }else if(type == "plus"){
+        //         if(quant < 100) {
+        //
+        //             quant = $("#quantity").val(quant + 1);
+        //             document.getElementById("spanCno").innerHTML=quant;
+        //             tot *= 2;
+        //             $("#totalPrice").val(tot);
+        //             $("#quantity").html(quant);
+        //         }else{
+        //             alert("주문은 최대 100개 까지 가능합니다. (100개 이상 대량주문은 전화로 문의 주십시오.)");
+        //         }
+        //     }
+        // }
+        
+        function addBasketItem(productId) {
+            var stat = $('#quantity').text();
+            var quantity = parseInt(stat,10);
+            var JSONObject= {
+                "productId" : productId,
+                "quantity" : quantity
+            };
+            var jsonData = JSON.stringify( JSONObject );
+            $.ajax({
+                url : '/api/basket',
+                method : 'post',
+                data : jsonData,
+                dataType: "text",
+                contentType: "application/json",
+                success : function (data) {
+                    if(data == "ok"){
+                        alert("장바구니에 추가되었습니다.");
+                    }
+                }
+            });
+        }
+
+        function addWishlistItem(productId){
+            $.ajax({
+                url : '/api/wishlist/'+productId,
+                method : 'post',
+                dataType: "text",
+                success : function (data) {
+                    if(data == "ok") {
+                        alert("위시리스트에 추가되었습니다.");
+                    }else if(data == "exist"){
+                        alert("이미 위시리스트에 존재하는 상품입니다.");
+                    }else if(data == "guest"){
+                        alert("로그인 하시면 위시리스트를 추가하실 수 있습니다.");
+                    }
+                }
+            });
+        }
+
+        function buyNow(productId) {
+            var stat = $('#quantity').text();
+            var quantity = parseInt(stat,10);
+
+            var form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "/orders/orderform");
+
+            var hiddenIdField = document.createElement("input");
+            hiddenIdField.setAttribute("type", "hidden");
+            hiddenIdField.setAttribute("name", "productId");
+            hiddenIdField.setAttribute("value", productId);
+
+            var hiddenQuantField = document.createElement("input");
+            hiddenQuantField.setAttribute("type", "hidden");
+            hiddenQuantField.setAttribute("name", "quantity");
+            hiddenQuantField.setAttribute("value", quantity.toString());
+
+            form.appendChild(hiddenIdField);
+            form.appendChild(hiddenQuantField);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        $(function(){
+            $('#minusBtn').click(function(e){
+                e.preventDefault();
+                var stat = $('#quantity').text();
+                var num = parseInt(stat,10);
+                var tot = parseInt($("#totalPrice").text(),10);  // 10 진수로 변환
+                num--;
+
+                if(num<=0){
+                    alert('더이상 줄일 수 없습니다.');
+                    num =1;
+                } else {
+                    tot /= 2;
+                }
+                // "${#numbers.formatCurrency(product.price)}"
+                $("#totalPrice").text(tot);
+                $('#quantity').text(num);
+            });
+            $('#plusBtn').click(function(e){
+                e.preventDefault();
+                var stat = $('#quantity').text();
+                var num = parseInt(stat,10);
+                var tot = parseInt($("#totalPrice").text(),10);
+                num++;
+                if(num>10){
+                    alert('더이상 늘릴 수 없습니다.');
+                    num=10;
+                } else {
+                    tot *= 2;
+                }
+                // "${#numbers.formatCurrency(product.price)}"
+                $("#totalPrice").text(tot);
+                $('#quantity').text(num);
+            });
+        });
+
+
+    </script>
+</th:block>
+<th:block layout:fragment="body_main">
+    <br><br>
+    <div style="margin-left: 75px"><h2>상품 상세보기</h2></div>
+    <hr style="padding-bottom: 40px">
+    <div class="container-fluid" style="width: 60%;">
+        <div>
+            <nav aria-label="breadcrumb" style="background-color: white;">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/}">홈</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/products}">상품목록</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">스티커</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col" style="text-align: center;">
+                <img width="80%" height="auto;" th:src="@{${product.imagePath}}">
+            </div>
+            <div class="col" style="padding-top: 35px;">
+                <div style="font-family: Consolas, 돋움"><h2 th:text="${product.name}"></h2></div>
+                <div class="row" style="padding: 20px;">
+                    <div class="col">
+                        <div style="padding-bottom: 10px"><h5>판매가</h5></div>
+                        <div style="padding-bottom: 10px">배송방법</div>
+                        <div style="padding-bottom: 10px">배송비</div>
+                        <div style="padding-bottom: 10px">Size</div>
+                    </div>
+                    <div class="col-8">
+                        <div style="padding-bottom: 10px"><h5><span th:text="${#numbers.formatCurrency(product.price)}"></span></h5></div>
+                        <div style="padding-bottom: 10px">고객직접선택</div>
+                        <div style="padding-bottom: 10px">고객직접선택</div>
+                        <div style="padding-bottom: 10px" th:text="${product.size}"></div>
+                    </div>
+                </div>
+                <div class="row" style="padding-top: 30px">
+                    <div class="col">
+                        <div style="font-family: Consolas, 돋움; padding-bottom: 10px;"><h5>Quantity</h5></div>
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <button type="button" class="btn btn-outline-secondary" id="minusBtn" onclick="changeQuant('minus')">-</button>
+                            <span class="btn btn-outline-secondary" id="quantity">1</span>
+                            <button type="button" class="btn btn-outline-secondary" id="plusBtn" onclick="changeQuant('plus')">+</button>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div style="font-family: Consolas, 돋움; padding-bottom: 10px;"><h5>Total Price</h5></div>
+                        <div><h5><span id="totalPrice" th:text="${product.price}"></span></h5></div>
+                    </div>
+                </div>
+                <div class="form-row" style="padding-top: 25px">
+                    <div class="col">
+                        <button type="button" class="btn btn-secondary btn-lg btn-block" th:onclick="'javascript:addBasketItem(' + ${product.id} + ')'"><small>장바구니</small></button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-secondary btn-lg btn-block" th:onclick="'javascript:addWishlistItem(' + ${product.id} + ')'"><small>위시리스트</small></button>
+                    </div>
+                </div>
+                <div style="padding-top: 10px">
+                    <button type="button" class="btn btn-success btn-lg btn-block" th:onclick="'javascript:buyNow(' + ${product.id} + ')'"><small>바로 구매</small></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="width: 60%;">
+        <div th:if="${not #lists.isEmpty(product.productFiles)}" th:each="file : ${product.productFiles}">
+            <img th:src="@{${file.saveFileName}}">
+        </div>
+    </div>
+</th:block>

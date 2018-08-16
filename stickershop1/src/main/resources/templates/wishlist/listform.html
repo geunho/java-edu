@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout/main_layout">
+
+<th:block layout:fragment="html_head">
+    <title>내 위시리스트</title>
+    <script src="/js/bower_components/jquery/dist/jquery.js"></script>
+    <script>
+        $(function () {
+            $("#deleteButton").click(function () {
+                var checkedAny = false;
+                $("input[name=listId]:checked").each(function() {
+                    checkedAny = true;
+                    var listid = $(this).val();
+                    $.ajax({
+                        url : '/api/wishlist/'+listid,
+                        method : 'delete',
+                        success : function (data) {
+                            document.getElementById(listid).remove();
+                            if(data == 0){
+                                // $("#listBody").append('<tr><td colspan="4" style="text-align: center;">위시리스트가 비어있습니다.</td></tr>');
+                            }
+                        }
+                    });
+                });
+                if(!checkedAny){
+                    alert("아이템을 선택해 주십시오.");
+                }
+             });
+
+            $("#addToBasket").click(function () {
+                var checkedAny = false;
+                $("input[name=listId]:checked").each(function() {
+                    checkedAny = true;
+                    var listId = $(this).val();
+                    var productId = $("#productId_"+listId).val();
+                    var JSONObject= {
+                        "productId" : productId,
+                        "quantity" : 1
+                    };
+                    var jsonData = JSON.stringify( JSONObject );
+                    $.ajax({
+                        url : '/api/basket',
+                        method : 'post',
+                        data : jsonData,
+                        dataType: "text",
+                        contentType: "application/json",
+                        success : function (data) {
+                            document.getElementById(listId).remove();
+                            if(data == "ok"){
+                                // alert("장바구니에 추가되었습니다.");
+                            }
+                        }
+                    });
+                });
+                if(!checkedAny){
+                    alert("아이템을 선택해 주십시오.");
+                }
+            });
+
+            $("#checkAll").click(function(){
+                if($("#checkAll").prop("checked")){
+                    $("input[name=listId]").prop("checked", true);
+                }else{
+                    $("input[name=listId]").prop("checked", false);
+                }
+            });
+        });
+    </script>
+</th:block>
+<th:block layout:fragment="body_main">
+    <br><br>
+    <div style="margin-left: 85px"><h2>위시리스트</h2></div>
+    <hr style="padding-bottom: 40px">
+    <div class="container-fluid" style="width: 60%;">
+        <div class="container wishlist" style="padding-bottom: 60px;">
+            <div class="card-deck mb-3 text-center">
+                <div class="card mb-4 box-shadow">
+                    <div class="card-body">
+                        <form method="post" id="wishlistForm"  action="#">
+                            <div class="container">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th width="8%" style="text-align: right;"><input type="checkbox" id="checkAll"></th>
+                                            <th colspan="2" width="*"><small>상품명</small></th>
+                                            <th width="50%" style="text-align: right; padding-right: 35px;"><small>가격</small></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="listBody">
+                                        <tr th:if="${#lists.isEmpty(list)}">
+                                            <td colspan="4" style="text-align: center;">위시리스트가 비어있습니다.</td>
+                                        </tr>
+                                        <tr th:if="${not #lists.isEmpty(list)}" th:attrappend="id=${item.id}" th:each="item : ${list}">
+                                            <td style="vertical-align: middle; text-align: right;">
+                                                <input type="checkbox"  id="listId" name="listId" th:value="${item.id}">
+                                                <input type="hidden" th:attrappend="id='productId_'+${item.id}" th:value="${item.product.id}">
+                                            </td>
+                                            <td style="vertical-align: middle; text-align: right;">
+                                                <a th:href="@{'/products/' + ${item.product.id}}">
+                                                    <img class="img-thumbnail" width="60" height="60" th:src="@{${item.product.imagePath}}">
+                                                </a>
+                                            </td>
+                                            <td style="vertical-align: middle; text-align: left; font-family: Consolas, 돋움;">
+                                                <a th:href="@{'/products/' + ${item.product.id}}"><h5><span th:text="${item.product.name}"></span></h5></a>
+                                            </td>
+                                            <td style="vertical-align: middle; text-align: right; padding-right: 35px;" th:text="${#numbers.formatCurrency(item.product.price)}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="form-row" style="width: 38%;">
+                                    <div class="col">
+                                        <small><strong>선택상품을</strong></small>
+                                    </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-dark btn-sm" id="addToBasket"><small>장바구니 담기</small></button>
+                                    </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-dark btn-sm" id="deleteButton" name="deleteButton"><small>삭제하기</small></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
