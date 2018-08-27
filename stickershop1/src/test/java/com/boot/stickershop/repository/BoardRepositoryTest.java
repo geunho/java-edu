@@ -60,17 +60,17 @@ public class BoardRepositoryTest {
     System.out.println(savedBoard);
   }
 
-  @Test
-  public void getBoard() {
-	  Board board = boardRepository.getOne(1L);
-    Board board2 = boardRepository.findBoardById(1L);
-
-    Assert.isTrue(board == board2);
-
-	  System.out.println(board.hashCode());
-	  System.out.println(board.getTitle());
-	  System.out.println(board.getContent());
-  }
+//  @Test
+//  public void getBoard() {
+//	  Board board = boardRepository.getOne(1L);
+//    Board board2 = boardRepository.findBoardById(1L);
+//
+//    Assert.isTrue(board == board2);
+//
+//	  System.out.println(board.hashCode());
+//	  System.out.println(board.getTitle());
+//	  System.out.println(board.getContent());
+//  }
 
 	@Test
 	public void getBoards() {

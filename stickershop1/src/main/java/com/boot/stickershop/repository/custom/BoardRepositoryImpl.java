@@ -2,6 +2,7 @@ package com.boot.stickershop.repository.custom;
 
 import com.boot.stickershop.domain.Board;
 import com.boot.stickershop.domain.Product;
+import com.boot.stickershop.domain.QBoard;
 import com.boot.stickershop.domain.QProduct;
 import com.boot.stickershop.dto.ProductSearch;
 import com.querydsl.jpa.JPQLQuery;
@@ -20,6 +21,11 @@ public class BoardRepositoryImpl extends QuerydslRepositorySupport implements Bo
 
     @Override
     public List<Board> getMainBoardsByDSL() {
-        return null;
+        QBoard qBoard = QBoard.board;
+
+
+
+      return null;
+
     }
 }
