@@ -53,8 +53,9 @@ public class MyUserDetailService implements UserDetailsService {
     }
     // User의 파생클래스를 만들어서 Member의 추가 정보를 함께 저장할 수 있다.
     // 즉, 이렇게 되면 추가로 저장한 정보를 컨트롤러에서 ArgumentViewResolver를 통해 접근할 수 있다.
-    UserDetails user = new User(email, member.getPasswd(), list);
-
+    MemberLoginInfo user = new MemberLoginInfo(email, member.getPasswd(), list);
+    user.setId(member.getId());
+    user.setName(member.getName());
     return user;
   }
 }
