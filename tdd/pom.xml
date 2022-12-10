@@ -16,7 +16,7 @@
         <deploy-path>deploy</deploy-path>
 
         <!-- spring framework -->
-        <spring-framework.version>5.1.9.RELEASE</spring-framework.version>
+        <spring-framework.version>6.0.0</spring-framework.version>
 
         <!-- jackson -->
         <jackson2.version>2.10.0.pr1</jackson2.version>
